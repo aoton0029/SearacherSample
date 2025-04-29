@@ -1,6 +1,6 @@
-﻿namespace SearachAppSample.Pages
+﻿namespace SearachAppSample.Pages.Results
 {
-    partial class UcSearchKatamei
+    partial class UcResult
     {
         /// <summary> 
         /// 必要なデザイナー変数です。
@@ -28,10 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ucItemDataGrid1 = new SearachAppSample.Items.UcItemDataGrid();
+            SuspendLayout();
+            // 
+            // ucItemDataGrid1
+            // 
+            ucItemDataGrid1.FetchAllData = null;
+            ucItemDataGrid1.FetchPagedData = null;
+            ucItemDataGrid1.FetchTotalCount = null;
+            ucItemDataGrid1.Location = new Point(3, 99);
+            ucItemDataGrid1.Mode = Items.UcItemDataGrid.DisplayMode.Pagination;
+            ucItemDataGrid1.Name = "ucItemDataGrid1";
+            ucItemDataGrid1.Size = new Size(1088, 590);
+            ucItemDataGrid1.TabIndex = 0;
+            // 
+            // UcResult
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(ucItemDataGrid1);
+            Name = "UcResult";
+            Size = new Size(1094, 692);
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private Items.UcItemDataGrid ucItemDataGrid1;
     }
 }

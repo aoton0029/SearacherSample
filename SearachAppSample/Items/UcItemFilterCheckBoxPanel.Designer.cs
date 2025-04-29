@@ -38,7 +38,7 @@
             flowLayoutPanel1.Location = new Point(0, 0);
             flowLayoutPanel1.Margin = new Padding(0);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(658, 104);
+            flowLayoutPanel1.Size = new Size(538, 104);
             flowLayoutPanel1.TabIndex = 0;
             // 
             // UcItemFilterCheckBoxPanel
@@ -47,7 +47,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(flowLayoutPanel1);
             Name = "UcItemFilterCheckBoxPanel";
-            Size = new Size(658, 104);
+            Size = new Size(538, 104);
             ResumeLayout(false);
         }
 
