@@ -55,7 +55,33 @@ namespace SearachAppSample.Core
         public static readonly Color SteelBlueDarker = Color.FromArgb(38, 76, 111);
         public static readonly Color SteelBlueDarkest = Color.FromArgb(31, 61, 89);
 
-
+        public static void RunWithLoadingForm(Action action, string message, bool canCancel = false)
+        {
+            using (var cts = new CancellationTokenSource())
+            {
+                using (var loadingForm = new FormLoading(message, canCancel, cts))
+                {
+                    loadingForm.Show();
+                    loadingForm.Update();
+                    // タスクを実行
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            action();
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            // キャンセルされた場合の処理
+                        }
+                        finally
+                        {
+                            loadingForm.Invoke((MethodInvoker)loadingForm.Close);
+                        }
+                    });
+                }
+            }
+        }
     }
 
     public class CustomColorPicker
