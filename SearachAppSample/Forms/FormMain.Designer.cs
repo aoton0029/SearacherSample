@@ -28,19 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
+            label1 = new Label();
             SuspendLayout();
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("メイリオ", 12F, FontStyle.Regular, GraphicsUnit.Point, 128);
+            label1.Location = new Point(193, 189);
+            label1.Name = "label1";
+            label1.Size = new Size(56, 24);
+            label1.TabIndex = 0;
+            label1.Text = "label1";
             // 
             // FormMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1334, 741);
+            Controls.Add(label1);
             Name = "FormMain";
             Text = "Form1";
             Shown += FormMain_Shown;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private Label label1;
     }
 }

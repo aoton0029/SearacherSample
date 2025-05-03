@@ -55,32 +55,226 @@ namespace SearachAppSample.Core
         public static readonly Color SteelBlueDarker = Color.FromArgb(38, 76, 111);
         public static readonly Color SteelBlueDarkest = Color.FromArgb(31, 61, 89);
 
-        public static void RunWithLoadingForm(Action action, string message, bool canCancel = false)
+        public static void RunWithLoadingForm(string message, bool canCancel, Action<CancellationToken> action)
         {
-            using (var cts = new CancellationTokenSource())
+            CancellationTokenSource cts = new CancellationTokenSource();
+            using (var loadingForm = new FormLoading(message, canCancel, cts))
             {
-                using (var loadingForm = new FormLoading(message, canCancel, cts))
+                // フォームを表示する前に設定
+                loadingForm.StartPosition = FormStartPosition.CenterScreen;
+
+                // タスクを実行
+                Task.Run(() =>
                 {
-                    loadingForm.Show();
-                    loadingForm.Update();
-                    // タスクを実行
-                    Task.Run(() =>
+                    try
                     {
-                        try
-                        {
-                            action();
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            // キャンセルされた場合の処理
-                        }
-                        finally
+                        action(cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // キャンセルされた場合の処理
+                    }
+                    finally
+                    {
+                        if (!loadingForm.IsDisposed && loadingForm.InvokeRequired)
                         {
                             loadingForm.Invoke((MethodInvoker)loadingForm.Close);
                         }
-                    });
-                }
+                    }
+                });
+                // ダイアログを表示
+                loadingForm.ShowDialog();
             }
+        }
+
+        //public static void RunWithLoadingForm(string message, bool canCancel, Action<CancellationToken> action)
+        //{
+        //    CancellationTokenSource cts = new CancellationTokenSource();
+        //    using (var loadingForm = new FormLoading(message, canCancel, cts))
+        //    {
+        //        // フォームを表示する前に設定
+        //        loadingForm.StartPosition = FormStartPosition.CenterScreen;
+
+        //        // 非同期で処理を開始するためのタスク
+        //        var actionTask = Task.Run(() =>
+        //        {
+        //            try
+        //            {
+        //                action(cts.Token);
+        //            }
+        //            catch (OperationCanceledException)
+        //            {
+        //                // キャンセルされた場合の処理
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                // 例外をキャプチャして後で再スロー
+        //                return ex;
+        //            }
+        //            return null;
+        //        });
+
+        //        // イベントハンドラーの代わりに、タスク完了時にフォームを閉じる
+        //        actionTask.ContinueWith(t =>
+        //        {
+        //            if (!loadingForm.IsDisposed && loadingForm.InvokeRequired)
+        //            {
+        //                loadingForm.Invoke((MethodInvoker)loadingForm.Close);
+        //            }
+        //        }, TaskScheduler.Default);
+
+        //        // ダイアログを表示（これはUIスレッドをブロックする）
+        //        loadingForm.ShowDialog();
+
+        //        // アクションが例外をスローした場合は再スロー
+        //        if (actionTask.IsCompleted && actionTask.Result is Exception ex)
+        //        {
+        //            throw new Exception("処理中にエラーが発生しました", ex);
+        //        }
+        //    }
+        //}
+
+        public static void RunWithLoadingFormInteractive(string message, bool canCancel, Action<CancellationToken, Action<Action>> action)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            using (var loadingForm = new FormLoading(message, canCancel, cts))
+            {
+                // フォームを表示する前に設定
+                loadingForm.StartPosition = FormStartPosition.CenterScreen;
+
+                // UIスレッドへのアクセス用のデリゲート（非同期）
+                Action<Action> invokeOnUI = (uiAction) =>
+                {
+                    if (loadingForm.IsDisposed)
+                        return;
+
+                    if (loadingForm.InvokeRequired)
+                    {
+                        loadingForm.BeginInvoke(uiAction);
+                    }
+                    else
+                    {
+                        uiAction();
+                    }
+
+                    // LoadingFormの更新を確保
+                    Application.DoEvents();
+                };
+
+                // タスクを実行
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        action(cts.Token, invokeOnUI);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // キャンセルされた場合の処理
+                    }
+                    finally
+                    {
+                        if (!loadingForm.IsDisposed)
+                        {
+                            loadingForm.Invoke((MethodInvoker)loadingForm.Close);
+                        }
+                    }
+                });
+
+                // ダイアログを表示
+                loadingForm.ShowDialog();
+            }
+        }
+
+
+        public static void RunWithLoadingForm(string message, bool canCancel, Action<CancellationToken, IProgress<int>> action)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            using (var loadingForm = new FormLoading(message, canCancel, cts))
+            {
+                // プログレス報告用
+                var progress = new Progress<int>(value => loadingForm.UpdateProgress(value));
+
+                // タスクを実行
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        action(cts.Token, progress);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // キャンセルされた場合の処理
+                    }
+                    finally
+                    {
+                        loadingForm.Invoke((MethodInvoker)loadingForm.Close);
+                    }
+                });
+
+                loadingForm.ShowDialog();
+            }
+        }
+
+        public static async Task<T> RunWithLoadingFormAsync<T>(string message, bool canCancel, Func<CancellationToken, Task<T>> func)
+        {
+            T result = default;
+            CancellationTokenSource cts = new CancellationTokenSource();
+            using (var loadingForm = new FormLoading(message, canCancel, cts))
+            {
+                // タスクを実行
+                var task = Task.Run(async () =>
+                {
+                    try
+                    {
+                        result = await func(cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // キャンセルされた場合の処理
+                    }
+                    finally
+                    {
+                        loadingForm.Invoke((MethodInvoker)loadingForm.Close);
+                    }
+                });
+
+                loadingForm.ShowDialog();
+                await task;
+            }
+            return result;
+        }
+
+        public static async Task<T> RunWithLoadingFormAsync<T>(string message, bool canCancel, Func<CancellationToken, IProgress<int>, Task<T>> func)
+        {
+            T result = default;
+            CancellationTokenSource cts = new CancellationTokenSource();
+            using (var loadingForm = new FormLoading(message, canCancel, cts))
+            {
+                // プログレス報告用
+                var progress = new Progress<int>(value => loadingForm.UpdateProgress(value));
+
+                // タスクを実行
+                var task = Task.Run(async () =>
+                {
+                    try
+                    {
+                        result = await func(cts.Token, progress);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // キャンセルされた場合の処理
+                    }
+                    finally
+                    {
+                        loadingForm.Invoke((MethodInvoker)loadingForm.Close);
+                    }
+                });
+
+                loadingForm.ShowDialog();
+                await task;
+            }
+            return result;
         }
     }
 

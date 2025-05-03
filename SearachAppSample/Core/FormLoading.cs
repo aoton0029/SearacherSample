@@ -29,10 +29,12 @@ namespace SearachAppSample.Core
                     _cts.Cancel();
                     btnCancel.Enabled = false;
                 };
+                progressBar1.Style = ProgressBarStyle.Blocks;
             }
             else
             {
                 btnCancel.Visible = false;
+                progressBar1.Style = ProgressBarStyle.Marquee;
             }
         }
 

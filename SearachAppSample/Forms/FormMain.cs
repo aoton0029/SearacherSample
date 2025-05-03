@@ -1,3 +1,4 @@
+using SearachAppSample.Core;
 using SearachAppSample.Pages;
 
 namespace SearachAppSample
@@ -18,7 +19,18 @@ namespace SearachAppSample
 
         private void FormMain_Shown(object sender, EventArgs e)
         {
-            _serviceProvider.Resolve<NavigationService>().NavigateTo<UcPageMain>();
+            //_serviceProvider.Resolve<NavigationService>().NavigateTo<UcPageMain>();
+
+            Common.RunWithLoadingForm("“Çž’†", false, (token) =>
+            {
+                this.Invoke(new Action(() =>
+                {
+                    for (int i = 0; i < 1000000; i++)
+                    {
+                        label1.Text = i.ToString();
+                    }
+                }));
+            });
         }
     }
 }
