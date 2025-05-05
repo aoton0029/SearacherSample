@@ -21,16 +21,6 @@ namespace SearachAppSample
         {
             //_serviceProvider.Resolve<NavigationService>().NavigateTo<UcPageMain>();
 
-            Common.RunWithLoadingForm("“Çž’†", false, (token) =>
-            {
-                this.Invoke(new Action(() =>
-                {
-                    for (int i = 0; i < 1000000; i++)
-                    {
-                        label1.Text = i.ToString();
-                    }
-                }));
-            });
         }
     }
 }
