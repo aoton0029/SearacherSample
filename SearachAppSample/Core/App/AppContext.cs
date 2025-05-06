@@ -43,6 +43,15 @@ namespace SearachAppSample.Core
             Directory.CreateDirectory(_appDataPath);
             LoadSettings();
 
+            // 履歴オブジェクトの初期化
+            int maxHistories = Settings.MaxSearchHistories;
+            SearchResultKouban = new History<SrchCondKouban>(maxHistories);
+            SearchResultBN = new History<SrchCondBN>(maxHistories);
+            SearchResultChuban = new History<SrchCondChuban>(maxHistories);
+            SearchResultKatamei = new History<SrchCondKatamei>(maxHistories);
+            SearchResultPN = new History<SrchCondPN>(maxHistories);
+            SearchResultSN = new History<SrchCondSN>(maxHistories);
+
             // 基本サービスの登録
             _serviceProvider.RegisterSingleton(this);
             _serviceProvider.RegisterSingleton<ProjectService>();

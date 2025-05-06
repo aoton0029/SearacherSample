@@ -13,7 +13,6 @@ namespace SearachAppSample.Core
     {
         public string ProjectVersion { get; set; } = "1.0";
         public Dictionary<string, object> Settings { get; set; } = new();
-        public List<SearchHistory> SearchHistories { get; set; } = new();
         public Dictionary<string, List<string>> AutoCompleteSuggestions { get; set; } = new();
 
         // プロジェクト特有の設定値を取得・設定するヘルパーメソッド
