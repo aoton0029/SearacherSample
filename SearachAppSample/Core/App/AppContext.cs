@@ -57,6 +57,7 @@ namespace SearachAppSample.Core
             _serviceProvider.RegisterSingleton<ProjectService>();
         }
 
+
         public void LoadSettings()
         {
             var configManager = new ConfigurationManager<GlobalSettings>("global_settings.json");
